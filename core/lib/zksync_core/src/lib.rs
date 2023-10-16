@@ -14,7 +14,7 @@ use zksync_circuit_breaker::{
 };
 use zksync_config::configs::api::MerkleTreeApiConfig;
 use zksync_config::configs::{
-    api::{HealthCheckConfig, Web3JsonRpcConfig},
+    api::{HealthCheckConfig, SnapshotsApiConfig, Web3JsonRpcConfig},
     chain::{
         self, CircuitBreakerConfig, MempoolConfig, NetworkConfig, OperationsManagerConfig,
         StateKeeperConfig,
@@ -97,6 +97,7 @@ use crate::{
     api_server::{
         contract_verification,
         execution_sandbox::{VmConcurrencyBarrier, VmConcurrencyLimiter},
+        snapshots,
         tx_sender::ApiContracts,
         web3,
     },
@@ -205,6 +206,8 @@ pub enum Component {
     Housekeeper,
     /// Component for exposing API's to prover for providing proof generation data and accepting proofs.
     ProofDataHandler,
+    // REST API for snapshots metadata
+    SnapshotsApi,
 }
 
 #[derive(Debug)]
@@ -274,6 +277,7 @@ impl FromStr for Components {
             "eth_tx_aggregator" => Ok(Components(vec![Component::EthTxAggregator])),
             "eth_tx_manager" => Ok(Components(vec![Component::EthTxManager])),
             "proof_data_handler" => Ok(Components(vec![Component::ProofDataHandler])),
+            "snapshots_api" => Ok(Components(vec![Component::SnapshotsApi])),
             other => Err(format!("{} is not a valid component name", other)),
         }
     }
@@ -472,6 +476,23 @@ pub async fn initialize_components(
             APP_METRICS.init_latency[&InitStage::ContractVerificationApi].set(elapsed);
             tracing::info!("initialized contract verification REST API in {elapsed:?}");
         }
+    }
+
+    if components.contains(&Component::SnapshotsApi) {
+        let started_at = Instant::now();
+        tracing::info!("initializing snapshots REST API");
+        let snapshots_api_config = SnapshotsApiConfig::from_env().context("SnapshotsApiConfig")?;
+        task_futures.push(snapshots::start_server_thread_detached(
+            connection_pool.clone(),
+            replica_connection_pool.clone(),
+            snapshots_api_config.clone(),
+            stop_receiver.clone(),
+        ));
+        tracing::info!(
+            "initialized snapshots REST API in {:?}",
+            started_at.elapsed()
+        );
+        metrics::gauge!("server.init.latency", started_at.elapsed(), "stage" => "snapshots_api");
     }
 
     if components.contains(&Component::StateKeeper) {

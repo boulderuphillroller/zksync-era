@@ -21,6 +21,7 @@ pub enum Bucket {
     NodeAggregationWitnessJobsFri,
     SchedulerWitnessJobsFri,
     ProofsFri,
+    StorageSnapshot,
 }
 
 impl Bucket {
@@ -36,6 +37,7 @@ impl Bucket {
             Self::NodeAggregationWitnessJobsFri => "node_aggregation_witness_jobs_fri",
             Self::SchedulerWitnessJobsFri => "scheduler_witness_jobs_fri",
             Self::ProofsFri => "proofs_fri",
+            Self::StorageSnapshot => "storage_logs_snapshots",
         }
     }
 }
