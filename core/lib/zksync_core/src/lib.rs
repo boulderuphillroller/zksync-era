@@ -483,7 +483,6 @@ pub async fn initialize_components(
         tracing::info!("initializing snapshots REST API");
         let snapshots_api_config = SnapshotsApiConfig::from_env().context("SnapshotsApiConfig")?;
         task_futures.push(snapshots::start_server_thread_detached(
-            connection_pool.clone(),
             replica_connection_pool.clone(),
             snapshots_api_config.clone(),
             stop_receiver.clone(),
