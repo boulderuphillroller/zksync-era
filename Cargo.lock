@@ -6133,18 +6133,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "snark_wrapper"
-version = "0.1.0"
-source = "git+https://github.com/matter-labs/snark-wrapper.git?branch=main#450ea6c9f3ede11e149b86ad3a072e673f9846e7"
-dependencies = [
- "boojum",
- "derivative",
- "franklin-crypto 0.0.5 (git+https://github.com/matter-labs/franklin-crypto?branch=snark_wrapper)",
- "rand 0.4.6",
- "rescue_poseidon 0.4.1 (git+https://github.com/matter-labs/rescue-poseidon.git?branch=poseidon2)",
-]
-
-[[package]]
 name = "snapshot_creator"
 version = "0.1.0"
 dependencies = [
@@ -6161,6 +6149,18 @@ dependencies = [
  "zksync_object_store",
  "zksync_types",
  "zksync_utils",
+]
+
+[[package]]
+name = "snark_wrapper"
+version = "0.1.0"
+source = "git+https://github.com/matter-labs/snark-wrapper.git?branch=main#450ea6c9f3ede11e149b86ad3a072e673f9846e7"
+dependencies = [
+ "boojum",
+ "derivative",
+ "franklin-crypto 0.0.5 (git+https://github.com/matter-labs/franklin-crypto?branch=snark_wrapper)",
+ "rand 0.4.6",
+ "rescue_poseidon 0.4.1 (git+https://github.com/matter-labs/rescue-poseidon.git?branch=poseidon2)",
 ]
 
 [[package]]

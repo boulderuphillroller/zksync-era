@@ -488,11 +488,9 @@ pub async fn initialize_components(
             snapshots_api_config.clone(),
             stop_receiver.clone(),
         ));
-        tracing::info!(
-            "initialized snapshots REST API in {:?}",
-            started_at.elapsed()
-        );
-        metrics::gauge!("server.init.latency", started_at.elapsed(), "stage" => "snapshots_api");
+        let elapsed = started_at.elapsed();
+        APP_METRICS.init_latency[&InitStage::SnapshotGenerator].set(elapsed);
+        tracing::info!("initialized snapshots REST API in {elapsed:?}",);
     }
 
     if components.contains(&Component::StateKeeper) {

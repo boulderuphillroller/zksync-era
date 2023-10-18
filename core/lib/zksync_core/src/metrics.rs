@@ -20,6 +20,7 @@ pub(crate) enum InitStage {
     DataFetcher,
     Tree,
     WitnessGenerator(AggregationRound),
+    SnapshotGenerator,
 }
 
 impl fmt::Display for InitStage {
@@ -35,6 +36,7 @@ impl fmt::Display for InitStage {
             Self::DataFetcher => formatter.write_str("data_fetchers"),
             Self::Tree => formatter.write_str("tree"),
             Self::WitnessGenerator(round) => write!(formatter, "witness_generator_{round:?}"),
+            Self::SnapshotGenerator => formatter.write_str("snapshot_generator"),
         }
     }
 }
