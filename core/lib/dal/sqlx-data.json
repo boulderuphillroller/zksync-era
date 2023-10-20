@@ -222,19 +222,19 @@
         }
       ],
       "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true
+        false,
+        false,
+        false,
+        false
       ],
       "parameters": {
         "Left": [
@@ -1320,6 +1320,52 @@
       }
     },
     "query": "SELECT eth_txs.id FROM eth_txs_history JOIN eth_txs\n                ON eth_txs.confirmed_eth_tx_history_id = eth_txs_history.id\n                WHERE eth_txs_history.tx_hash = $1"
+  },
+  "1f69b3584dea530163fe9153bff46d48c20a5c7d8b322ea163c908c29d525e3c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "key",
+          "ordinal": 0,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "value",
+          "ordinal": 1,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "address",
+          "ordinal": 2,
+          "type_info": "Bytea"
+        },
+        {
+          "name": "miniblock_number",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "l1_batch_number",
+          "ordinal": 4,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n            SELECT storage_logs.key,\n                   storage_logs.value,\n                   storage_logs.address,\n                   storage_logs.miniblock_number,\n                   initial_writes.l1_batch_number\n            FROM (SELECT hashed_key,\n                         max(ARRAY [miniblock_number, operation_number]::int[]) AS op\n                  FROM storage_logs\n                  WHERE miniblock_number < $1\n                  GROUP BY hashed_key\n                  ORDER BY hashed_key) AS keys\n                     INNER JOIN storage_logs ON keys.hashed_key = storage_logs.hashed_key\n                AND storage_logs.miniblock_number = keys.op[1]\n                AND storage_logs.operation_number = keys.op[2]\n                     INNER JOIN initial_writes ON keys.hashed_key = initial_writes.hashed_key\n            WHERE miniblock_number < $1\n            LIMIT $2 OFFSET $3;\n             "
   },
   "1faf6552c221c75b7232b55210c0c37be76a57ec9dc94584b6ccb562e8b182f2": {
     "describe": {
