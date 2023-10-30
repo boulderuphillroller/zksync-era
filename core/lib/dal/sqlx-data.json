@@ -244,6 +244,26 @@
     },
     "query": "\n                WITH events_select AS (\n                    SELECT\n                        address, topic1, topic2, topic3, topic4, value,\n                        miniblock_number, tx_hash, tx_index_in_block,\n                        event_index_in_block, event_index_in_tx\n                    FROM events\n                    WHERE miniblock_number > $1\n                    ORDER BY miniblock_number ASC, event_index_in_block ASC\n                )\n                SELECT miniblocks.hash as \"block_hash?\",\n                    address as \"address!\", topic1 as \"topic1!\", topic2 as \"topic2!\", topic3 as \"topic3!\", topic4 as \"topic4!\", value as \"value!\",\n                    miniblock_number as \"miniblock_number!\", miniblocks.l1_batch_number as \"l1_batch_number?\", tx_hash as \"tx_hash!\",\n                    tx_index_in_block as \"tx_index_in_block!\", event_index_in_block as \"event_index_in_block!\", event_index_in_tx as \"event_index_in_tx!\"\n                FROM events_select\n                INNER JOIN miniblocks ON events_select.miniblock_number = miniblocks.number\n                ORDER BY miniblock_number ASC, event_index_in_block ASC\n                "
   },
+  "05dd7740e61d65a8204f3f39191fbe75bba682c2442e44f9aac28c367e6c47df": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT count(*) FROM initial_writes WHERE l1_batch_number <= $1"
+  },
   "073582051133075adfc51a18d15639129dd00628aa4994b602843ac979ad4419": {
     "describe": {
       "columns": [],
@@ -3729,6 +3749,19 @@
     },
     "query": "SELECT bootloader_code_hash, default_account_code_hash FROM protocol_versions\n                WHERE id = $1\n            "
   },
+  "52db5a4742de1415c4f97f8883674e813cb5c301d903e922ad8df1b0e207b351": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "TextArray"
+        ]
+      }
+    },
+    "query": "INSERT INTO snapshots (l1_batch_number, created_at, files) VALUES ($1, now(), $2)"
+  },
   "52eeb8c529efb796fdefb30a381fcf6c931512f30e55e24c155f6c649e662909": {
     "describe": {
       "columns": [
@@ -3746,6 +3779,20 @@
       }
     },
     "query": "\n                UPDATE scheduler_dependency_tracker_fri\n                SET status='queuing'\n                WHERE l1_batch_number IN\n                      (SELECT l1_batch_number FROM scheduler_dependency_tracker_fri\n                       WHERE status != 'queued'\n                         AND circuit_1_final_prover_job_id IS NOT NULL\n                         AND circuit_2_final_prover_job_id IS NOT NULL\n                         AND circuit_3_final_prover_job_id IS NOT NULL\n                         AND circuit_4_final_prover_job_id IS NOT NULL\n                         AND circuit_5_final_prover_job_id IS NOT NULL\n                         AND circuit_6_final_prover_job_id IS NOT NULL\n                         AND circuit_7_final_prover_job_id IS NOT NULL\n                         AND circuit_8_final_prover_job_id IS NOT NULL\n                         AND circuit_9_final_prover_job_id IS NOT NULL\n                         AND circuit_10_final_prover_job_id IS NOT NULL\n                         AND circuit_11_final_prover_job_id IS NOT NULL\n                         AND circuit_12_final_prover_job_id IS NOT NULL\n                         AND circuit_13_final_prover_job_id IS NOT NULL\n                       )\n                RETURNING l1_batch_number;\n            "
+  },
+  "530603ddb0d22d1bee4d74106a50adfb8a98fbaabc5beda463d67fe7297dd631": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Bool",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO applied_snapshot_status(l1_batch_number, is_finished, last_finished_chunk_id)\n            VALUES ($1, $2, $3)\n            ON CONFLICT\n                (l1_batch_number)\n                DO UPDATE\n                SET l1_batch_number        = excluded.l1_batch_number,\n                    is_finished            = excluded.is_finished,\n                    last_finished_chunk_id = excluded.last_finished_chunk_id\n            "
   },
   "5490012051be6faaaa11fad0f196eb53160a9c5c045fe9d66afcef7f33403fe2": {
     "describe": {
@@ -4799,6 +4846,26 @@
     },
     "query": "SELECT number, timestamp, is_finished, l1_tx_count, l2_tx_count, fee_account_address, bloom, priority_ops_onchain_data, hash, parent_hash, commitment, compressed_write_logs, compressed_contracts, eth_prove_tx_id, eth_commit_tx_id, eth_execute_tx_id, merkle_root_hash, l2_to_l1_logs, l2_to_l1_messages, used_contract_hashes, compressed_initial_writes, compressed_repeated_writes, l2_l1_compressed_messages, l2_l1_merkle_root, l1_gas_price, l2_fair_gas_price, rollup_last_leaf_index, zkporter_is_available, bootloader_code_hash, default_aa_code_hash, base_fee_per_gas, aux_data_hash, pass_through_data_hash, meta_parameters_hash, protocol_version, events_queue_commitment, bootloader_initial_content_commitment FROM l1_batches LEFT JOIN commitments ON commitments.l1_batch_number = l1_batches.number WHERE number = $1"
   },
+  "687b4bbd2902f7636f3e83a2f5d8929e09f455c418003c816415d84a3fb64492": {
+    "describe": {
+      "columns": [
+        {
+          "name": "max",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "select MAX(number) from miniblocks where l1_batch_number = $1"
+  },
   "68a9ba78f60674bc047e4af6eb2a379725da047f2e6c06bce96a33852565cc95": {
     "describe": {
       "columns": [],
@@ -5061,6 +5128,36 @@
       }
     },
     "query": "\n                SELECT protocol_version\n                FROM witness_inputs\n                WHERE l1_batch_number = $1\n                "
+  },
+  "700b0511437995b86c095fb2c23d62bcef67529ea16283431556298cef4aa299": {
+    "describe": {
+      "columns": [
+        {
+          "name": "l1_batch_number",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_finished",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "last_finished_chunk_id",
+          "ordinal": 2,
+          "type_info": "Int4"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT l1_batch_number, is_finished, last_finished_chunk_id FROM applied_snapshot_status"
   },
   "7091a5c10a913f053129a76299d2e6fe7081473456888d30fb41b23a01d28690": {
     "describe": {
@@ -6264,21 +6361,6 @@
     },
     "query": "DELETE FROM l1_batches WHERE number > $1"
   },
-  "881d549243fcfccbb2c1c472d8d30fb23fe6051e0a229eaf8022782997a39ea4": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "Bool",
-          "Int4"
-        ]
-      }
-    },
-    "query": "\n            INSERT INTO applied_snapshot_status(l1_batch_number, miniblock_number, is_finished, last_finished_chunk_id)\n            VALUES ($1, $2, $3, $4)\n            ON CONFLICT\n                (l1_batch_number)\n                DO UPDATE\n                SET l1_batch_number        = excluded.l1_batch_number,\n                    miniblock_number       = excluded.miniblock_number,\n                    is_finished            = excluded.is_finished,\n                    last_finished_chunk_id = excluded.last_finished_chunk_id\n            "
-  },
   "88c49ebeb45f7208d223de59ec08a332beac765644e4f29ed855808b8f9cef91": {
     "describe": {
       "columns": [
@@ -6304,6 +6386,38 @@
       }
     },
     "query": "\n                    SELECT id, circuit_input_blob_url FROM prover_jobs\n                    WHERE status='successful' AND is_blob_cleaned=FALSE\n                    AND circuit_input_blob_url is NOT NULL\n                    AND updated_at < NOW() - INTERVAL '30 days'\n                    LIMIT $1;\n                "
+  },
+  "88ec9342421aa002a963be487207157e9e0190c06ac91782d0c3ddb67b83be15": {
+    "describe": {
+      "columns": [
+        {
+          "name": "l1_batch_number",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        },
+        {
+          "name": "files",
+          "ordinal": 2,
+          "type_info": "TextArray"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT l1_batch_number, created_at, files FROM snapshots WHERE l1_batch_number = $1"
   },
   "892ad2bed255401e020b4cf89c9e43e32c333dc6627e1e2d2535e13b73d1c508": {
     "describe": {
@@ -6891,36 +7005,6 @@
       }
     },
     "query": "DELETE FROM storage WHERE hashed_key = ANY($1)"
-  },
-  "97efa9c53fc00e82ea37e34a90903dbf9063108dcd520bee858ee25209e85622": {
-    "describe": {
-      "columns": [
-        {
-          "name": "l1_batch_number",
-          "ordinal": 0,
-          "type_info": "Int8"
-        },
-        {
-          "name": "miniblock_number",
-          "ordinal": 1,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 2,
-          "type_info": "Timestamp"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT l1_batch_number, miniblock_number, created_at FROM snapshots"
   },
   "987fcbbd716648c7c368462643f13d8001d5c6d197add90613ae21d21fdef79b": {
     "describe": {
@@ -7643,44 +7727,6 @@
     },
     "query": "SELECT MAX(operation_number) as \"max?\" FROM storage_logs WHERE miniblock_number = $1"
   },
-  "a819c63083637818ddafb07963e050de52ec557c4d98560515089744ffb059d4": {
-    "describe": {
-      "columns": [
-        {
-          "name": "l1_batch_number",
-          "ordinal": 0,
-          "type_info": "Int8"
-        },
-        {
-          "name": "miniblock_number",
-          "ordinal": 1,
-          "type_info": "Int8"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 2,
-          "type_info": "Timestamp"
-        },
-        {
-          "name": "files",
-          "ordinal": 3,
-          "type_info": "TextArray"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      }
-    },
-    "query": "SELECT l1_batch_number, miniblock_number, created_at, files FROM snapshots WHERE l1_batch_number = $1"
-  },
   "a9b1a31def214f8b1441dc3ab720bd270f3991c9f1c7528256276e176d532163": {
     "describe": {
       "columns": [
@@ -8146,26 +8192,6 @@
       }
     },
     "query": "UPDATE miniblocks SET hash = u.hash   FROM UNNEST($1::bigint[], $2::bytea[]) AS u(number, hash) WHERE miniblocks.number = u.number\n        "
-  },
-  "b3a17c7c3663e2cc83e7031f30f8a67631a9a2a0dc9ea84c8b57d5052a40342f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "max",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      }
-    },
-    "query": "select MAX(number) from miniblocks where l1_batch_number <= $1"
   },
   "b479b7d3334f8d4566c294a44e2adb282fbc66a87be5c248c65211c2a8a07db0": {
     "describe": {
@@ -9051,42 +9077,6 @@
     },
     "query": "SELECT bytecode, bytecode_hash FROM factory_deps WHERE bytecode_hash = ANY($1)"
   },
-  "bf75fba6ec3d632a85feec562a4c6a45c97a23969277d990374bbb12dfe94487": {
-    "describe": {
-      "columns": [
-        {
-          "name": "l1_batch_number",
-          "ordinal": 0,
-          "type_info": "Int8"
-        },
-        {
-          "name": "miniblock_number",
-          "ordinal": 1,
-          "type_info": "Int8"
-        },
-        {
-          "name": "is_finished",
-          "ordinal": 2,
-          "type_info": "Bool"
-        },
-        {
-          "name": "last_finished_chunk_id",
-          "ordinal": 3,
-          "type_info": "Int4"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "SELECT l1_batch_number, miniblock_number, is_finished, last_finished_chunk_id FROM applied_snapshot_status"
-  },
   "c178e1574d2a16cb90bcc5d5333a4f8dd2a69e0c12b4e7e108a8dcc6000669a5": {
     "describe": {
       "columns": [
@@ -9725,6 +9715,30 @@
       }
     },
     "query": "SELECT usd_price, usd_price_updated_at FROM tokens WHERE l2_address = $1"
+  },
+  "c8e4716df604720404cf4bfee2057c8333782f9372e35a4fa1a295536c57c106": {
+    "describe": {
+      "columns": [
+        {
+          "name": "l1_batch_number",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT l1_batch_number, created_at FROM snapshots"
   },
   "c92a84c15a8641f73417a03de99a0fb7e07fd0da7b376e65b3ed61209e55a5fa": {
     "describe": {
@@ -10396,26 +10410,6 @@
       }
     },
     "query": "UPDATE eth_txs_history\n                SET updated_at = now(), confirmed_at = now()\n                WHERE tx_hash = $1\n                RETURNING id, eth_tx_id"
-  },
-  "e39af0e9d9f9b4cd6d67f9a06e52a04025a52a1a049cccaca5d78aa955248656": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Int8"
-        ]
-      }
-    },
-    "query": "SELECT count(*) FROM initial_writes WHERE l1_batch_number >= $1"
   },
   "e409b39a5e62a3a4ec5d3b6aae4935c13b93129a22ffe6a0b68b5ade1f6082c8": {
     "describe": {
@@ -11632,20 +11626,6 @@
       }
     },
     "query": "SELECT * FROM eth_txs WHERE id = $1"
-  },
-  "fa8d92209690298f10beb752a9835d147e969f4b77dff293bcdaf694f9303514": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Int8",
-          "Int8",
-          "TextArray"
-        ]
-      }
-    },
-    "query": "INSERT INTO snapshots (l1_batch_number, miniblock_number, created_at, files) VALUES ($1, $2, now(), $3)"
   },
   "fc52c356fd09d82da89a435d08398d9b773494491404b5c84fc14c1c1d374b59": {
     "describe": {
