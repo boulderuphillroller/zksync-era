@@ -14,7 +14,7 @@ use zksync_circuit_breaker::{
 };
 use zksync_config::configs::api::MerkleTreeApiConfig;
 use zksync_config::configs::{
-    api::{HealthCheckConfig, SnapshotsApiConfig, Web3JsonRpcConfig},
+    api::{HealthCheckConfig, Web3JsonRpcConfig},
     chain::{
         self, CircuitBreakerConfig, MempoolConfig, NetworkConfig, OperationsManagerConfig,
         StateKeeperConfig,
@@ -97,7 +97,6 @@ use crate::{
     api_server::{
         contract_verification,
         execution_sandbox::{VmConcurrencyBarrier, VmConcurrencyLimiter},
-        snapshots,
         tx_sender::ApiContracts,
         web3,
     },
@@ -476,20 +475,6 @@ pub async fn initialize_components(
             APP_METRICS.init_latency[&InitStage::ContractVerificationApi].set(elapsed);
             tracing::info!("initialized contract verification REST API in {elapsed:?}");
         }
-    }
-
-    if components.contains(&Component::SnapshotsApi) {
-        let started_at = Instant::now();
-        tracing::info!("initializing snapshots REST API");
-        let snapshots_api_config = SnapshotsApiConfig::from_env().context("SnapshotsApiConfig")?;
-        task_futures.push(snapshots::start_server_thread_detached(
-            replica_connection_pool.clone(),
-            snapshots_api_config.clone(),
-            stop_receiver.clone(),
-        ));
-        let elapsed = started_at.elapsed();
-        APP_METRICS.init_latency[&InitStage::SnapshotGenerator].set(elapsed);
-        tracing::info!("initialized snapshots REST API in {elapsed:?}",);
     }
 
     if components.contains(&Component::StateKeeper) {

@@ -136,6 +136,8 @@ impl ReorgDetector {
 
     async fn run_inner(&self) -> RpcResult<L1BatchNumber> {
         loop {
+            //TODO fix this component
+            tokio::time::sleep(Duration::from_secs(3600)).await;
             let sealed_l1_batch_number = self
                 .pool
                 .access_storage()

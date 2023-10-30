@@ -24,12 +24,13 @@ use zksync_core::{
     state_keeper::{L1BatchExecutorBuilder, MainBatchExecutorBuilder, ZkSyncStateKeeper},
     sync_layer::{
         batch_status_updater::BatchStatusUpdater, external_io::ExternalIO,
-        fetcher::MainNodeFetcherCursor, genesis::perform_genesis_if_needed, ActionQueue,
-        MainNodeClient, SyncState,
+        fetcher::MainNodeFetcherCursor, genesis::perform_genesis_if_needed,
+        snapshots::load_snapshot_if_needed, ActionQueue, MainNodeClient, SyncState,
     },
 };
 use zksync_dal::{connection::DbVariant, healthcheck::ConnectionPoolHealthCheck, ConnectionPool};
 use zksync_health_check::CheckHealth;
+use zksync_object_store::ObjectStoreFactory;
 use zksync_state::PostgresStorageCaches;
 use zksync_storage::RocksDB;
 use zksync_utils::wait_for_tasks::wait_for_tasks;
@@ -150,7 +151,8 @@ async fn init_tasks(
     .await;
     healthchecks.push(Box::new(metadata_calculator.tree_health_check()));
 
-    let consistency_checker = ConsistencyChecker::new(
+    //TODO Restore consistency checker
+    let _consistency_checker = ConsistencyChecker::new(
         &config
             .required
             .eth_client_url()
@@ -185,12 +187,7 @@ async fn init_tasks(
     let tree_handle =
         task::spawn(metadata_calculator.run(tree_pool, prover_tree_pool, tree_stop_receiver));
 
-    let consistency_checker_handle = if !config.optional.experimental_multivm_support {
-        Some(tokio::spawn(consistency_checker.run(stop_receiver.clone())))
-    } else {
-        // TODO (BFT-264): Current behavior of consistency checker makes development of MultiVM harder.
-        None
-    };
+    let consistency_checker_handle = None;
 
     let updater_handle = task::spawn(batch_status_updater.run(stop_receiver.clone()));
     let sk_handle = task::spawn(state_keeper.run());
@@ -393,6 +390,21 @@ async fn main() -> anyhow::Result<()> {
     // Make sure that genesis is performed.
     let main_node_client = <dyn MainNodeClient>::json_rpc(&main_node_url)
         .context("Failed creating JSON-RPC client for main node")?;
+
+    let blob_store = ObjectStoreFactory::from_env()
+        .context("ObjectStoreFactor::prover_from_env()")?
+        .create_store()
+        .await;
+
+    load_snapshot_if_needed(
+        &mut connection_pool.access_storage().await.unwrap(),
+        &main_node_client,
+        blob_store.as_ref(),
+        &config.required.merkle_tree_path,
+    )
+    .await
+    .context("Loading newest snapshot failed")?;
+
     perform_genesis_if_needed(
         &mut connection_pool.access_storage().await.unwrap(),
         config.remote.l2_chain_id,

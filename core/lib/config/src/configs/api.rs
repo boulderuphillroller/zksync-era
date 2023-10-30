@@ -245,26 +245,6 @@ impl MerkleTreeApiConfig {
     }
 }
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
-pub struct SnapshotsApiConfig {
-    /// Port to which the REST server is listening.
-    pub port: u16,
-    /// URL to access REST server.
-    pub url: String,
-    /// number of threads per server
-    pub threads_per_server: u32,
-}
-
-impl SnapshotsApiConfig {
-    pub fn bind_addr(&self) -> SocketAddr {
-        SocketAddr::new("0.0.0.0".parse().unwrap(), self.port)
-    }
-
-    pub fn from_env() -> anyhow::Result<Self> {
-        envy_load("snapshots", "API_SNAPSHOTS_")
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::net::IpAddr;

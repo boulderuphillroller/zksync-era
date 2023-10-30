@@ -12,6 +12,7 @@ pub use sqlx::types::BigDecimal;
 
 // Local imports
 use crate::accounts_dal::AccountsDal;
+use crate::applied_snapshot_status_dal::AppliedSnapshotStatusDal;
 use crate::blocks_dal::BlocksDal;
 use crate::blocks_web3_dal::BlocksWeb3Dal;
 pub use crate::connection::ConnectionPool;
@@ -35,7 +36,7 @@ use crate::snapshots_dal::SnapshotsDal;
 use crate::storage_dal::StorageDal;
 use crate::storage_logs_dal::StorageLogsDal;
 use crate::storage_logs_dedup_dal::StorageLogsDedupDal;
-use crate::storage_logs_snapshots_dal::StorageLogsSnapshotsDal;
+use crate::storage_logs_snapshots_dal::SnapshotChunksDal;
 use crate::storage_web3_dal::StorageWeb3Dal;
 use crate::sync_dal::SyncDal;
 use crate::system_dal::SystemDal;
@@ -48,6 +49,7 @@ use crate::witness_generator_dal::WitnessGeneratorDal;
 #[macro_use]
 mod macro_utils;
 pub mod accounts_dal;
+pub mod applied_snapshot_status_dal;
 pub mod blocks_dal;
 pub mod blocks_web3_dal;
 pub mod connection;
@@ -316,7 +318,11 @@ impl<'a> StorageProcessor<'a> {
         SnapshotsDal { storage: self }
     }
 
-    pub fn storage_logs_snapshots_dal(&mut self) -> StorageLogsSnapshotsDal<'_, 'a> {
-        StorageLogsSnapshotsDal { storage: self }
+    pub fn storage_logs_snapshots_dal(&mut self) -> SnapshotChunksDal<'_, 'a> {
+        SnapshotChunksDal { storage: self }
+    }
+
+    pub fn applied_snapshot_status_dal(&mut self) -> AppliedSnapshotStatusDal<'_, 'a> {
+        AppliedSnapshotStatusDal { storage: self }
     }
 }
