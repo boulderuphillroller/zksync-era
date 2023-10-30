@@ -7006,6 +7006,32 @@
     },
     "query": "DELETE FROM storage WHERE hashed_key = ANY($1)"
   },
+  "9837e873545cc2b6b3eae15f4de35cf8d3385631d9971cb541be4704e516582f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "l1_batch_number",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 1,
+          "type_info": "Timestamp"
+        }
+      ],
+      "nullable": [
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "SELECT l1_batch_number, created_at FROM snapshots WHERE l1_batch_number = $1"
+  },
   "987fcbbd716648c7c368462643f13d8001d5c6d197add90613ae21d21fdef79b": {
     "describe": {
       "columns": [],

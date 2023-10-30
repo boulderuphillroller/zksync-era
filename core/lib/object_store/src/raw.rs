@@ -117,6 +117,8 @@ pub trait ObjectStore: fmt::Debug + Send + Sync {
     ///
     /// Returns an error if removal fails.
     async fn remove_raw(&self, bucket: Bucket, key: &str) -> Result<(), ObjectStoreError>;
+
+    fn get_full_path_raw(&self, bucket: Bucket, key: &str) -> String;
 }
 
 #[async_trait]
@@ -136,6 +138,10 @@ impl<T: ObjectStore + ?Sized> ObjectStore for Arc<T> {
 
     async fn remove_raw(&self, bucket: Bucket, key: &str) -> Result<(), ObjectStoreError> {
         (**self).remove_raw(bucket, key).await
+    }
+
+    fn get_full_path_raw(&self, bucket: Bucket, key: &str) -> String {
+        (**self).get_full_path_raw(bucket, key)
     }
 }
 
@@ -183,6 +189,18 @@ impl ObjectStoreFactory {
     pub fn prover_from_env() -> anyhow::Result<Self> {
         Ok(Self::new(
             ObjectStoreConfig::prover_from_env().context("ObjectStoreConfig::prover_from_env()")?,
+        ))
+    }
+
+    /// Creates an object store factory with the prover configuration taken from the environment.
+    ///
+    /// # Errors
+    ///
+    /// Invalid or missing configuration.
+    pub fn snapshots_from_env() -> anyhow::Result<Self> {
+        Ok(Self::new(
+            ObjectStoreConfig::snapshots_from_env()
+                .context("ObjectStoreConfig::snapshots_from_env()")?,
         ))
     }
 

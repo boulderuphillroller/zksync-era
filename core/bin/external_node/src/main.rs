@@ -25,12 +25,11 @@ use zksync_core::{
     sync_layer::{
         batch_status_updater::BatchStatusUpdater, external_io::ExternalIO,
         fetcher::MainNodeFetcherCursor, genesis::perform_genesis_if_needed,
-        snapshots::load_snapshot_if_needed, ActionQueue, MainNodeClient, SyncState,
+        snapshots::load_from_snapshot_if_needed, ActionQueue, MainNodeClient, SyncState,
     },
 };
 use zksync_dal::{connection::DbVariant, healthcheck::ConnectionPoolHealthCheck, ConnectionPool};
 use zksync_health_check::CheckHealth;
-use zksync_object_store::ObjectStoreFactory;
 use zksync_state::PostgresStorageCaches;
 use zksync_storage::RocksDB;
 use zksync_utils::wait_for_tasks::wait_for_tasks;
@@ -391,15 +390,9 @@ async fn main() -> anyhow::Result<()> {
     let main_node_client = <dyn MainNodeClient>::json_rpc(&main_node_url)
         .context("Failed creating JSON-RPC client for main node")?;
 
-    let blob_store = ObjectStoreFactory::from_env()
-        .context("ObjectStoreFactor::prover_from_env()")?
-        .create_store()
-        .await;
-
-    load_snapshot_if_needed(
+    load_from_snapshot_if_needed(
         &mut connection_pool.access_storage().await.unwrap(),
         &main_node_client,
-        blob_store.as_ref(),
         &config.required.merkle_tree_path,
     )
     .await

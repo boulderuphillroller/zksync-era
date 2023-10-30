@@ -31,6 +31,10 @@ impl ObjectStoreConfig {
     pub fn prover_from_env() -> anyhow::Result<Self> {
         envy_load("prover_object_store", "PROVER_OBJECT_STORE_")
     }
+
+    pub fn snapshots_from_env() -> anyhow::Result<Self> {
+        envy_load("snapshots_object_store", "SNAPSHOTS_OBJECT_STORE_")
+    }
 }
 
 #[cfg(test)]
@@ -93,5 +97,20 @@ mod tests {
         lock.set_env(config);
         let actual = ObjectStoreConfig::prover_from_env().unwrap();
         assert_eq!(actual, expected_config("/prover_base_url"));
+    }
+
+    #[test]
+    fn snapshots_bucket_config_from_env() {
+        let mut lock = MUTEX.lock();
+        let config = r#"
+            SNAPSHOTS_OBJECT_STORE_BUCKET_BASE_URL="/snapshots_base_url"
+            SNAPSHOTS_OBJECT_STORE_MODE="FileBacked"
+            SNAPSHOTS_OBJECT_STORE_FILE_BACKED_BASE_PATH="artifacts"
+            SNAPSHOTS_OBJECT_STORE_GCS_CREDENTIAL_FILE_PATH="/path/to/credentials.json"
+            SNAPSHOTS_OBJECT_STORE_MAX_RETRIES="5"
+        "#;
+        lock.set_env(config);
+        let actual = ObjectStoreConfig::snapshots_from_env().unwrap();
+        assert_eq!(actual, expected_config("/snapshots_base_url"));
     }
 }
