@@ -67,7 +67,7 @@ pub struct SelectionGate {
 }
 ```
 
-Internaly the `Variable` object is `pub struct Variable(pub(crate) u64);` - so it is an index to the position within the
+Internally the `Variable` object is `pub struct Variable(pub(crate) u64);` - so it is an index to the position within the
 constraint system object.
 
 And now let's see how we can add this gate into the system.
@@ -204,12 +204,12 @@ filled with concrete values.
 
 ### CsAllocatable
 
-Implements CsAllocatable - which allows you to directly 'allocate' this struct within constraing system (similarly to
+Implements CsAllocatable - which allows you to directly 'allocate' this struct within constraint system (similarly to
 how we were operating on regular 'Variables' above).
 
 ### CSSelectable
 
-Implements the `Selectable` trait - that allows this struct to participage in operations like conditionally select (so
+Implements the `Selectable` trait - that allows this struct to participate in operations like conditionally select (so
 it can be used as 'a' or 'b' in the Select gate example above).
 
 ### CSVarLengthEncodable

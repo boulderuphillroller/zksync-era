@@ -42,7 +42,7 @@ One round of prover generation consists of:
 
 - `WitnessGenerator` picks up the next `queued` job in its input table and processes it (invoking the corresponding
   helper function in `zkevm_test_harness` repo)
-- it saves the generated circuis to `prover_jobs` table and the other artifacts to its output table
+- it saves the generated circuits to `prover_jobs` table and the other artifacts to its output table
 - the individual proofs are picked up by the provers, processed, and marked as complete.
 - when the last proof for this round is computed, the prover updates the row in the output table setting its status to
   `queued`

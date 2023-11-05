@@ -32,7 +32,7 @@ a bunch of registers. More details on this will be written in the future article
 Having a different VM means that we must have a separate compiler [zk-solc](https://github.com/matter-labs/zksolc-bin) -
 as the bytecode that is produced by this compiler has to use the zkEVM specific opcodes.
 
-While having a separte compiler introduces a bunch of challenges (for example, we need a custom
+While having a separate compiler introduces a bunch of challenges (for example, we need a custom
 [hardhat plugins](https://github.com/matter-labs/hardhat-zksync) ), it brings a bunch of benefits too: for example it
 allows us to move some of the VM logic (like new contract deployment) into System contracts - which allows faster &
 cheaper modifications and increased flexibility.
@@ -70,7 +70,7 @@ override getDeployTransaction(..) {
 }
 ```
 
-Also `ContractDeployer` adding a special prefix for all the new contract addresses. This means that contract addesses
+Also `ContractDeployer` adding a special prefix for all the new contract addresses. This means that contract addresses
 WILL be different on `zkSync` and Ethereum (and also leaves us the possibility of adding Ethereum addresses in the
 future if needed).
 
